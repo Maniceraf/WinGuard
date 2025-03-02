@@ -2,32 +2,23 @@ import sys
 import sqlite3
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
 from PyQt5.QtCore import Qt
-from pynput import keyboard  # Chặn tổ hợp phím
+import keyboard
 
 # ================================
 # 🔹 CHẶN TỔ HỢP PHÍM NGUY HIỂM
 # ================================
-def on_press(key):
-    """Chặn các tổ hợp phím không mong muốn"""
-    blocked_keys = [
-        keyboard.Key.esc,          # Chặn phím ESC
-        keyboard.Key.alt_l,        # Chặn ALT trái
-        keyboard.Key.alt_r,        # Chặn ALT phải
-        keyboard.Key.ctrl_l,       # Chặn CTRL trái
-        keyboard.Key.ctrl_r,       # Chặn CTRL phải
-        keyboard.Key.cmd,          # Chặn phím Windows
-        keyboard.Key.tab,          # Chặn phím TAB
-    ]
-    
-    if key in blocked_keys:
-        return False  # Ngăn không cho bấm phím này
 
-listener = keyboard.Listener(on_press=on_press)
-listener.start()
+blocked_keys = ["esc", "alt", "ctrl", "win", "tab"]
+for key in blocked_keys:
+    keyboard.block_key(key)
+
+keyboard.add_hotkey("alt+tab", lambda: None, suppress=True)
+keyboard.add_hotkey("win+d", lambda: None, suppress=True)
 
 # ================================
 # 🔹 KẾT NỐI DATABASE SQLITE
 # ================================
+
 conn = sqlite3.connect("users.db")
 cursor = conn.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (username TEXT, password TEXT)")
@@ -41,6 +32,7 @@ if cursor.fetchone() is None:
 # ================================
 # 🔹 MÀN HÌNH KHÓA
 # ================================
+
 class LockScreen(QWidget):
     password_verified = False  # Biến theo dõi trạng thái đăng nhập
 
@@ -92,6 +84,7 @@ class LockScreen(QWidget):
 # ================================
 # 🔹 CHẠY ỨNG DỤNG
 # ================================
+
 app = QApplication(sys.argv)
 lockscreen = LockScreen()
 lockscreen.show()
